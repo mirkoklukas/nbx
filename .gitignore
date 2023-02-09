@@ -1,3 +1,32 @@
+#-------------
+# my ignores
+# -------------
+
+# _files are private, helps keeping the repo clean,
+# while prototyping
+**/_*/
+**/_*
+**/_*.*
+!**/__*__.py
+**/.DS_Store
+
+# github doesn't like big files
+# exclude where necessary
+shared/
+shared
+local/
+local
+**/data/
+
+# tensorboard runs folder and 
+# pytorch lightning stuff
+**/runs/
+**/lightning_logs/
+**/logs/
+
+# -------------
+# nbdev ignores
+# -------------
 _docs/
 _proc/
 
