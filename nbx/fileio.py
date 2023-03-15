@@ -37,7 +37,7 @@ def ls_bash(path="./", absolute=False, posix=False):
 ls = ls_bash
 
 # %% ../notebooks/02_fileio.ipynb 5
-def save(obj, fname):
+def save(obj, fname, format=None):
     """
     Saves an object to a file.
     
@@ -47,7 +47,8 @@ def save(obj, fname):
 
     p = Path(fname)
     name   = p.stem
-    format = p.suffix
+    if format is None: format = p.suffix
+
 
     if format==".yaml":
         with open(p, 'w') as f:
@@ -64,15 +65,20 @@ def save(obj, fname):
 
     elif format==".npy" or format==".npz":
         np.save(p, obj)
-
+        
+    elif format==".txt":
+        with open(p, 'w') as f:
+            f.write(obj)
     else:
         with open(p, 'wb') as f:
             pickle.dump(obj, f)
+            
+    
 
 # %% ../notebooks/02_fileio.ipynb 6
-def dump(obj, fname): 
+def dump(obj, fname, format=None): 
     """Dumps an object to file.""" 
-    return save(obj, fname)
+    return save(obj, fname, format)
 
 # %% ../notebooks/02_fileio.ipynb 7
 def load(fname, format=None):
