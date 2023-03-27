@@ -265,11 +265,11 @@ def get_nbx_cells_src(nb):
 # %% ../notebooks/05a_nbx_parser.ipynb 25
 class Line(object):
     def __init__(self, src=""):
-        self.name = None
+        self.tag = None
         self.src  = src
         
-    def __eq__(self, other): return self.name == other
-    def __ne__(self, other): return self.name != other
+    def __eq__(self, other): return self.tag == other
+    def __ne__(self, other): return self.tag != other
     def __str__(self) : return f"``{self.src}''"
     def __repr__(self): return f"{self.__class__.__name__}('{self.src}')"
     
@@ -277,12 +277,12 @@ class Line(object):
 class TaggedLine(Line):
     def __init__(self, tag, flags, src = ""): 
         super().__init__(src=src)
-        self.name  = tag
+        self.tag  = tag
         self.flags = flags
         
     def __str__(self): 
         flags = "".join([f" --{k}=``{v}''" for k,v in self.flags.items()])
-        return f"<{self.name}{flags}/>"
+        return f"<{self.tag}{flags}/>"
     
     def __repr__(self): return f"TaggedLine('{self.name}', '{self.src}')"
     
@@ -290,7 +290,7 @@ class TaggedLine(Line):
 class EmptyLine(Line): 
     def __init__(self,): 
         super().__init__(src="")
-        self.name = "empty"
+        self.tag = "empty"
         
     def __str__(self) : return u"\u2205" # "empty set" symbol
 
@@ -365,7 +365,7 @@ def parse_into_nbx_blocks(nbpath):
     return blocks
 
 # %% ../notebooks/05a_nbx_parser.ipynb 32
-def parse_into_nbx_block_dict(nbpath):
+def parse_into_nbx_block_dict(nbpath, tags=["nbx"]):
     """
     Parses a notebook into "nbx blocks", a new block is started when 
     an nbx line contains a different filename than the last one.
@@ -385,14 +385,12 @@ def parse_into_nbx_block_dict(nbpath):
     # Split into into nbx blocks, 
     # typically just one.
     fname = None
-    blocks = {fname: Block(fname=fname, 
-                           nbpath=nbpath, 
-                           src=[])}
-    for line in lines[1:]:
-        if line == "nbx" and "fname" in line.flags:
-                fname = line.flags["fname"]
-                if fname not in blocks: 
-                    blocks[fname] = Block(fname=fname, nbpath=nbpath, src=[], nbx_meta=line.flags)
+    blocks = {}
+    for line in lines:
+        if line == "nbx":
+            if "fname" in line.flags: fname = line.flags["fname"]
+            if fname not in blocks: 
+                blocks[fname] = Block(fname=fname, nbpath=nbpath, src=[], nbx_meta=line.flags)
                 
         blocks[fname].src.append(line)
         
@@ -486,14 +484,14 @@ from .cli import add_argparse
 def _create_jl_from_nb(nb_path):
     nbpath = Path(nb_path)
     created = []
-    for block in parse_into_nbx_blocks(nbpath):
+    blocks = parse_into_nbx_block_dict(nbpath)
+    for block in blocks.values():
         fname = nbx_block_to_file(block)
         created.append(fname)
     
-    print("\nExported julia-files:")
+    print("Exported julia-files:")
     for file in created:
         print(">>", f"\"{file}\"")
-    print("\n")
     
     return created   
 

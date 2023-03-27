@@ -83,11 +83,10 @@ ssh = add_argparse(_ssh)
 import subprocess
 import sys    
 
-def _scp(source, target, ops,*, ip=None, user=None, key=None):
+def _scp(sources, target, ip=None, user=None, key=None):
     """scp..."""
     conf = Bunch(ip=ip,user=user,key=key)
                 
-    ops = " ".join(ops)
     # Loads default config if there is one
     # and update the conf object with data
     # from it
@@ -110,20 +109,35 @@ def _scp(source, target, ops,*, ip=None, user=None, key=None):
     # proceed if we got everything or return
     dump(conf, fname)
     if fail: return
+    
+    
+    
+    target = target.replace("_rem_",  f"{conf.user}@{conf.ip}")    
+    target = target.replace("_home_", f"{conf.user}@{conf.ip}:~")    
+    ops = ""
+    if "_rem_" not in sources[0] and Path(sources[0]).is_dir():
+        ops = "-r"
+    for i in range(len(sources)): 
+        sources[i] = sources[i].replace("_rem_",  f"{conf.user}@{conf.ip}")
+        sources[i] = sources[i].replace("_home_", f"{conf.user}@{conf.ip}:~")
+        
+    print(f"Copying")
+    for source in sources: print(f"\t{source}")
+    print(f"to\n\t{target}")
 
-    source = source.replace("_rem_", f"{conf.user}@{conf.ip}")
-    target = target.replace("_rem_", f"{conf.user}@{conf.ip}")
+    sources = " ".join(sources)
     
-    
+
+
     # Connect to server and forward local port 8888 to remote port 8888
     # We can now connect to a remote jupyter notebook server via `http://localhost:8888/`
-    cmd = f"scp -i {conf.key} {ops} {source} {target}"
-#     print(cmd)
+    cmd = f"scp -i {conf.key} {ops} {sources} {target}"
+
     os.system(f'bash -c \"{cmd}\"')
 
 
 def scp():
-    source, target = sys.argv[1:3]
-    ops = sys.argv[3:]
-    _scp(source, target, ops)
+    sources = sys.argv[1:-1]
+    target = sys.argv[-1]
+    _scp(sources, target)
 
