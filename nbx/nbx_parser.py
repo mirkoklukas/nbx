@@ -390,8 +390,9 @@ def parse_into_nbx_block_dict(nbpath, tags=["nbx"]):
         if line == "nbx":
             if "fname" in line.flags: fname = line.flags["fname"]
             if fname not in blocks: 
-                blocks[fname] = Block(fname=fname, nbpath=nbpath, src=[], nbx_meta=line.flags)
-                
+                    blocks[fname] = Block(fname=fname, nbpath=nbpath, src=[], nbx_meta=line.flags)
+                    
+
         blocks[fname].src.append(line)
         
     return blocks
@@ -477,7 +478,7 @@ def nbx_block_to_file(block):
     return os.path.normpath(nbpath.parent/fname)
 
 
-# %% ../notebooks/05a_nbx_parser.ipynb 48
+# %% ../notebooks/05a_nbx_parser.ipynb 47
 from .cli import add_argparse
 
 
@@ -485,9 +486,10 @@ def _create_jl_from_nb(nb_path):
     nbpath = Path(nb_path)
     created = []
     blocks = parse_into_nbx_block_dict(nbpath)
-    for block in blocks.values():
-        fname = nbx_block_to_file(block)
-        created.append(fname)
+    for fname,block in blocks.items():
+        if fname is not None:
+            fname = nbx_block_to_file(block)
+            created.append(fname)
     
     print("Exported julia-files:")
     for file in created:
