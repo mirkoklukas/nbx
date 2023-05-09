@@ -360,7 +360,8 @@ def parse_into_nbx_blocks(nbpath):
                 if fname != last_fname:
                     blocks.append(Block(fname=fname, nbpath=nbpath, src=[], nbx_meta=line.flags))
                     last_fname = fname
-        blocks[-1].src.append(line)
+                    
+        if len(blocks) > 0: blocks[-1].src.append(line)
         
     return blocks
 
@@ -384,7 +385,7 @@ def parse_into_nbx_block_dict(nbpath, tags=["nbx"]):
         
     # Split into into nbx blocks, 
     # typically just one.
-    fname = None
+    fname = "None"
     blocks = {}
     for line in lines:
         if line == "nbx":
@@ -487,7 +488,7 @@ def _create_jl_from_nb(nb_path):
     created = []
     blocks = parse_into_nbx_block_dict(nbpath)
     for fname,block in blocks.items():
-        if fname is not None:
+        if fname != "None":
             fname = nbx_block_to_file(block)
             created.append(fname)
     

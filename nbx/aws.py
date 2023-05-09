@@ -36,6 +36,7 @@ Host {host}
     User {user}
     HostName {ip}
     IdentityFile {key}
+    
 """
 
 def _ssh(ip, *, user=None, key=None, port=8888):
